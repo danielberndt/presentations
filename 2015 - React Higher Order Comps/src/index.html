@@ -1,0 +1,328 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Higher-order Components </title>
+    <link rel="stylesheet" type="text/css" href="build/build.css">
+  </head>
+  <body>
+    <article>
+      <section>
+        <h1>Higher-order Components</h1>
+      </section>
+      <section>
+        <h3 class="bullet">About me</h3>
+        <ul>
+          <li><a href="https://twitter.com/D40B">Daniel</a></li>
+          <li><small><a href="http://www.codecks.io">www.codecks.io</a></small></li>
+          <li><small>full-time web developer since 2010</small></li>
+        </ul>
+      </section>
+      <section>
+        <ul>
+          <li>First Stop: <a href="https://jquery.com/">jQuery</a></li>
+          <li><img src="./images/spaghetti.gif"/></li>
+        </ul>
+      </section>
+      <section>
+        <ul>
+          <li>Next Stop: <a href="https://angularjs.org/">AngularJS</a></li>
+          <li class="angular-feeling">
+            <img src="./images/angularjs_feeling.png" height="400"/>
+            <img class="bullet angular-meh" src="./images/angularjs_meh.png" height="150"/>
+          </li>
+        </ul>
+      </section>
+      <section>
+        <h2 class="bullet">Final destination:</h2>
+        <ul>
+          <li><img src="./images/reactjs_logo.svg" height="300" class="react-logo"/></li>
+        </ul>
+      </section>
+      <section>
+        <h3 class="bullet">What's this talk about?</h3>
+        <h2 class="bullet">How do I get my server data to the components?</h2>
+      </section>
+      <section>
+        <div class="img-container">
+          <img class="bullet" src="./images/mockup-empty.png" height="400"/>
+          <img class="bullet img-overlay" src="./images/mockup-full.png" height="400"/>
+        </div>
+      </section>
+      <section>
+        <h3 class="bullet">i.e. <i>what strategies exist to pass the same data to several components</i></h3>
+        <p class="bullet">Ideally asynchronously...</p>
+        <p class="bullet">With as little coupling and boilerplate as possible...</p>
+      </section>
+      <section>
+        <h2 class="bullet">Naive approach</h2>
+        <p class="bullet">Load the data in <b>root node</b>, pass it to all its <code>/(grand-)*children/</code></p>
+        <div class="img-container">
+          <img class="bullet" src="./images/naive-1.png" height="200"/>
+          <img class="bullet img-overlay" src="./images/naive-2.png" height="200"/>
+          <img class="bullet img-overlay" src="./images/naive-3.png" height="200"/>
+        </div>
+      </section>
+      <section>
+        <h3 class="bullet">Not ideal for many reasons:</h3>
+        <ul>
+          <li>high degree of coupling:</li>
+          <li>(grand-)parents need to know what data their (grand-)children need</li>
+          <li>
+            hard to create generic parent-components<br>
+            <small>(depending on their children they might require different props)</small>
+          </li>
+        </ul>
+      </section>
+      <section>
+        <div class="bullet">
+          <h3>Say hello to Flux.</h3>
+          <h2>Say hello to <i>SIDELOADING</i>!</h2>
+        </div>
+        <div class="img-container">
+          <img class="bullet" src="./images/sideloading-1.png" height="200"/>
+          <img class="bullet img-overlay" src="./images/sideloading-2.png" height="200"/>
+          <img class="bullet img-overlay" src="./images/sideloading-3.png" height="200"/>
+        </div>
+      </section>
+      <section>
+        <h2 class="bullet">What does it look like?</h2>
+        <h3 class="bullet">first the bare bones component</h3>
+        <pre class="bullet"><code class="language-jsx">var Avatar = React.createClass({
+  getInitialState: function() {
+    return {user: null};
+  },</code>
+  <code class="language-jsx bullet">render: function() {
+    if (this.state.user === null) {
+      return &lt;div&gt;loading...&lt;/div&gt;;
+    } else {
+      return &lt;div&gt;hello {this.state.user.name}&lt;/div&gt;;
+    }
+  }
+});
+</code></pre>
+      </section>
+      <section>
+        <h3 class="bullet">now connect it to the store!</h3>
+        <pre class="bullet"><code class="language-jsx">
+var Avatar = React.createClass({
+  componentDidMount: function() {
+    UserStore.listen(this.handleUserStoreChange);
+  },</code>
+  <code class="language-jsx bullet">componentWillUnmount: function() {
+    UserStore.unlisten(this.handleUserStoreChange);
+  },</code>
+  <code class="language-jsx bullet">handleUserStoreChange: function(data) {
+    this.setState({user: data});
+  },
+  ...
+});
+</code></pre>
+      </section>
+      <section>
+        <h2 class="bullet">How to generalise?</h2>
+        <p class="bullet">First stop: mixins</p>
+        <pre class="bullet"><code class="language-jsx">var Reflux = require("reflux");</code>
+
+<code class="language-jsx bullet">var Avatar = React.createClass({</code>
+
+  <code class="language-jsx bullet">mixins: [Reflux.connect(UserStore,"user")],
+  </code>
+  <code class="language-jsx bullet">//this.state.user is loaded from store
+  ...
+});</code></pre>
+      </section>
+      <section>
+        <h3 class="bullet">but...</h3>
+        <h2 class="bullet"><i>MIXINS ARE DEAD!</i></h2>
+        <div class="bullet">
+          <blockquote >Unfortunately, we will not launch any mixin support for ES6 classes in React. That would defeat the purpose of only using idiomatic JavaScript concepts.</blockquote>
+          <p><small> — <a href="https://facebook.github.io/react/blog/2015/01/27/react-v0.13.0-beta-1.html">React v0.13.0 beta release announcement</a></small></p>
+        </div>
+      </section>
+      <section>
+        <h2 class="bullet">Mixins...</h2>
+        <ul>
+          <li>don't compose well</li>
+          <li>add <i>more</i> state to your components — but you should strive for <i>less</i></li>
+          <li>make your components more opaque</li>
+          <li>add an additional interface without the safety guarantees of e.g. <code>PropTypes</code></li>
+        </ul>
+      </section>
+      <section>
+        <h3 class="bullet">... so what should I use instead?</h3>
+        <p class="bullet">it should be</p>
+        <ul>
+          <li>able to abstract away my state/data handling</li>
+          <li>easy to compose</li>
+        </ul>
+      </section>
+      <section>
+        <h3 class="bullet">It turns out React offers something already:</h3>
+        <h2 class="bullet"><i>COMPONENTS!</i></h2>
+        <p class="bullet">Let's just wrap our views in <i>Higher Order Components</i> that pass down their data as props</p>
+      </section>
+      <section>
+        <h3 class="bullet">Our apps will consist of two types of components</h3>
+        <ul>
+          <li>
+            <p><b>Higher Order Components</b> <small>also: <b>smart components</b></small></p>
+            <p>load data from stores and pass them down to children.</p>
+            <p class="bullet"><small><b>They do not render any DOM elements themselves</b></small></p><br>
+          </li>
+          <li>
+            <p><b>Dumb Components</b></p>
+            <p>usually don't have state, just props that get rendered to DOM.</p>
+          </li>
+        </ul>
+      </section>
+      <section>
+        <h3 class="bullet">Let's see it in action</h3>
+        <pre class="bullet"><code class="language-jsx">var Page = React.createClass({
+  render: function() {
+    return (
+      &#x3C;div&#x3E;
+        &#x3C;LoadUser id={5}&#x3E;
+          // passes 'user' data as additional prop
+          &#x3C;Avatar style="fancy"/&#x3E;
+        &#x3C;/LoadUser&#x3E;
+      &#x3C;/div&#x3E;
+    );
+  }
+});</code></pre>
+      </section>
+      <section>
+        <h3 class="bullet">What does <code>&#x3C;LoadUser&#x3E;</code> look like?</h3>
+        <pre class="bullet"><code class="language-jsx">const LoadUser = React.createClass({</code>
+<code class="language-jsx bullet">
+  // connect to store and load data into this.state</code>
+
+<code class="language-jsx bullet">
+  render: function() {
+    var childProps = {user: this.state.user};</code>
+
+    <code class="language-jsx bullet">var child = this.props.children
+    return React.cloneElement(child, childProps);
+  }
+});
+        </code></pre>
+      </section>
+      <section>
+        <h3 class="bullet">Can be abstracted even further</h3>
+        <pre class="bullet"><code class="language-jsx">var Page = React.createClass({
+  render: function() {
+    return (
+      &#x3C;div&#x3E;
+        &#x3C;Load model="user" id={5}&#x3E;
+          // passes 'user' data as additional prop
+          &#x3C;Avatar style="fancy"/&#x3E;
+        &#x3C;/Load&#x3E;
+      &#x3C;/div&#x3E;
+    );
+  }
+});</code></pre>
+      </section>
+      <section>
+        <h2 class="bullet">Very nice!</h2>
+        <p class="bullet"><code class="language-jsx">&#x3C;Avatar/&#x3E;</code> now is a <b><i>dumb</i></b> component</p>
+      </section>
+      <section>
+        <h3 class="bullet">but...</h3>
+        <p class="bullet">There still is some <i>coupling</i> going on</p>
+        <p class="bullet">The <b>Parent</b> needs to know what kind of data the <b>Child</b> needs</p>
+        <p class="bullet"><small>i.e maybe <code>&#x3C;Avatar/&#x3E;</code> needs data from the <code>ImageStore</code> or <code>FriendsStore</code> as well?</small></p>
+      </section>
+      <section>
+        <h3 class="bullet">ideally we just wanna do this:</h3>
+        <pre class="bullet"><code class="language-jsx">var Page = React.createClass({
+  render: function() {
+    return (
+      &#x3C;div&#x3E;
+        &#x3C;Avatar userId={5} style="fancy"/&#x3E;
+      &#x3C;/div&#x3E;
+    );
+  }
+});</code></pre>
+      </section>
+      <section>
+        <h2 class="bullet">We can actually do this!</h2>
+        <pre class="bullet"><code class="language-jsx">var Avatar = React.createClass({
+  render: function() {
+    return !this.props.user ?
+      &#x3C;div&#x3E;...loading&#x3C;/div&#x3E; :
+      &#x3C;div&#x3E;hello {this.props.user.name}&#x3C;/div&#x3E;;
+    }
+});</code>
+
+<code class="language-jsx bullet">
+module.exports = load(Avatar, [UserStore], {
+  user: props =&#x3E; UserStore.getUser(props.userId)
+});</code></pre>
+      </section>
+      <section>
+        <h3 class="bullet">here's what <code>load</code> looks like</h3>
+        <pre class="bullet"><code class="language-jsx">var load = function(Comp, stores, data) {</code>
+<code class="language-jsx bullet">
+  return React.createClass({ //Higher Order Component</code>
+<code class="language-jsx bullet">
+    // connect to stores...</code>
+<code class="language-jsx bullet">
+    handleStoreChange: function() {
+      newState = {};
+      Object.keys(data).forEach(key => {
+        newState[key] = data[key](this.props)
+      })
+      this.setState(newState)
+    },</code>
+<code class="language-jsx bullet">
+    render: function() {
+      return &#x3C;Comp {...this.props} {...this.state}/&#x3E;
+    }
+  });
+}</code></pre>
+      </section>
+      <section>
+        <h3 class="bullet">or if you feel like the future is now...</h3>
+        <h2 class="bullet">Use <i>DECORATORS!</i></h2>
+        <pre class="bullet"><code class="language-jsx">@load([UserStore], {
+  user: props =&#x3E; UserStore.getUser(props.userId)
+})
+class Avatar {
+  render() {
+    return !this.props.user ?
+      &#x3C;div&#x3E;...loading&#x3C;/div&#x3E; :
+      &#x3C;div&#x3E;hello {this.props.user.name}&#x3C;/div&#x3E;
+  };
+}</code></pre>
+        <p class="bullet"><small>requires slightly different signature for <code>load</code></small></p>
+      </section>
+      <section>
+        <h2 class="bullet">here we are!</h2>
+        <p class="bullet">we now arrived at a solution that:</p>
+        <ul>
+          <li>has low coupling</li>
+          <li>is generalisable</li>
+          <li>requires little typing</li>
+          <li>is future proof <div><small class="bullet"><b>future = next two years...</b></small></div></li>
+        </ul>
+      </section>
+      <section>
+        <h3>further reading:</h3>
+        <p><a href="http://acdlite.github.io/flummox">Flummox</a> — Flux implementation that uses Higher Order Components via <code>FluxComponent</code></p>
+        <p><a href="https://medium.com/@dan_abramov/mixins-are-dead-long-live-higher-order-components-94a0d2f9e750">Mixins Are Dead. Long Live Composition</a> — very influental blog post</p>
+        <p><a href="https://github.com/gaearon/react-stateful">A higher-order React component for lifting state</a> – using decorators to hoist state into a Higher Order Component</p>
+      </section>
+      <section>
+        <h2 class="bullet">Thank you!</h2>
+        <div class="bullet">
+          <h3><img src="./images/twitter.png" height="25"/> @D40B</h3>
+        </div>
+      </section>
+    </article>
+    <script src="build/build.js"></script>
+
+<!-- <script type="text/javascript">document.write('<script src="' + (location.protocol || 'http:') + '//' + (location.hostname || 'localhost') + ':35729/livereload.js?snipver=1" type="text/javascript"><\/script>')</script> -->
+</body>
+</html>
