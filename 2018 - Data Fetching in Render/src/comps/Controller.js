@@ -11,6 +11,8 @@ class Controller extends React.Component {
       slideController: {
         setSlideCount: this.setSlideCount,
         slideCount: this.state.slideCount,
+        captureNextPrev: this.handleCaptureNextPrev,
+        releaseNextPrev: this.releaseCaptureNextPrev,
       },
     };
   }
@@ -20,6 +22,8 @@ class Controller extends React.Component {
     slideCount: 0,
   };
 
+  nextPrevHandler = null;
+
   setSlideCount = target => {
     this.setState({slideCount: target}, () => {
       if (target <= this.state.index) {
@@ -28,8 +32,24 @@ class Controller extends React.Component {
     });
   };
 
+  handleCaptureNextPrev = handler => (this.nextPrevHandler = handler);
+  releaseCaptureNextPrev = () => (this.nextPrevHandler = null);
+
   handleSetIndex = target => {
     if (target >= 0 && target < this.state.slideCount) this.props.navigator.setIndex(target);
+  };
+
+  handleNext = () => {
+    if (this.nextPrevHandler && this.nextPrevHandler.next() !== false) return;
+    if (this.state.index + 1 < this.state.slideCount) {
+      this.props.navigator.setIndex(this.state.index + 1);
+    }
+  };
+  handlePrev = () => {
+    if (this.nextPrevHandler && this.nextPrevHandler.prev() !== false) return;
+    if (this.state.index > 0) {
+      this.props.navigator.setIndex(this.state.index - 1);
+    }
   };
 
   componentDidMount() {
@@ -41,7 +61,12 @@ class Controller extends React.Component {
   }
 
   render() {
-    return this.props.children(this.state.index, this.handleSetIndex);
+    return this.props.children({
+      index: this.state.index,
+      setIndex: this.handleSetIndex,
+      prev: this.handlePrev,
+      next: this.handleNext,
+    });
   }
 }
 

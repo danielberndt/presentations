@@ -6,6 +6,7 @@ import Slide from "./comps/Slide";
 import FullScreen from "./comps/FullScreen";
 import KeyboardController from "./comps/KeyboardController";
 import createHistoryNavigator from "./lib/navigator";
+import SlideStepper, {Step} from "./comps/SlideStepper";
 
 const navigator = createHistoryNavigator();
 
@@ -17,6 +18,8 @@ const centerCss = {
   textAlign: "center",
 };
 
+const cols = ["#D25641", "#E7926A", "#F7C294", "#80D4F1", "#3EC0F1"];
+
 const StaticContainer = g.div({
   position: "absolute",
   top: 0,
@@ -26,7 +29,22 @@ const StaticContainer = g.div({
   pointerEvents: "none",
 });
 
-const cols = ["#D25641", "#E7926A", "#F7C294", "#80D4F1", "#3EC0F1"];
+const TopLine = g.div({
+  position: "absolute",
+  top: 0,
+  left: 0,
+  right: 0,
+  height: "0.5vh",
+});
+
+const BottomContainer = g.div({
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  right: 0,
+  display: "flex",
+});
+
 const parts = [
   {slidesCount: 2, label: "Intro"},
   {slidesCount: 3, label: "Styles"},
@@ -40,12 +58,14 @@ const NavItem = g.div(({slidesCount, col}) => ({
   backgroundColor: col,
 }));
 
-const NavItemContent = g.div({
+const NavItemContent = g.div(({active}) => ({
   margin: "0.8vh 2vw",
   fontSize: "0.8vw",
-  color: "rgba(255,255,255,0.5)",
+  color: `rgba(255,255,255,${active ? 0.95 : 0.5})`,
+  fontWeight: "bold",
   textTransform: "uppercase",
-});
+  transitionProperty: "color",
+}));
 
 const Arrow = g.div({
   position: "absolute",
@@ -67,38 +87,53 @@ const ArrowContainer = g.div({
   top: 0,
 });
 
-const Statics = ({nextSlide}) => (
-  <Slide.Data>
-    {({params, interpolatedIndex, slideCount}) => (
-      <StaticContainer>
-        <g.Div
-          position="absolute"
-          bottom={0}
-          left="0"
-          right="0"
-          display="flex"
-          style={{
-            transform: `translate3d(0, ${100 * (1 - params.showUi)}%,0)`,
-          }}
-        >
-          {parts.map(({slidesCount, label}, i) => (
-            <NavItem key={label} slidesCount={slidesCount} col={cols[i]}>
-              <NavItemContent>{label}</NavItemContent>
-            </NavItem>
-          ))}
-          <ArrowContainer
-            css={{width: `${100 / (slideCount - 1)}vw`}}
+const Statics = () => {
+  let sum = 0;
+  return (
+    <Slide.Data>
+      {({params, interpolatedIndex, slideCount}) => (
+        <StaticContainer>
+          <TopLine
             style={{
-              transform: `translate3d(${100 / (slideCount - 1) * (interpolatedIndex - 1)}vw,0,0)`,
+              backgroundColor: params.themeCol,
+              transform: `translate3d(0, ${-100 * (1 - params.showUi)}%,0)`,
+              opacity: params.showUi,
+            }}
+          />
+          <BottomContainer
+            style={{
+              transform: `translate3d(0, ${100 * (1 - params.showUi)}%,0)`,
+              opacity: params.showUi,
             }}
           >
-            <Arrow style={{borderBottomColor: params.themeCol}} />
-          </ArrowContainer>
-        </g.Div>
-      </StaticContainer>
-    )}
-  </Slide.Data>
-);
+            {parts.map(({slidesCount, label}, i) => {
+              sum += slidesCount;
+              return (
+                <NavItem key={label} slidesCount={slidesCount} col={cols[i]}>
+                  <NavItemContent
+                    active={
+                      sum - slidesCount + 0.5 < interpolatedIndex && interpolatedIndex < sum + 0.5
+                    }
+                  >
+                    {label}
+                  </NavItemContent>
+                </NavItem>
+              );
+            })}
+            <ArrowContainer
+              css={{width: `${100 / (slideCount - 1)}vw`}}
+              style={{
+                transform: `translate3d(${100 / (slideCount - 1) * (interpolatedIndex - 1)}vw,0,0)`,
+              }}
+            >
+              <Arrow style={{borderBottomColor: params.themeCol}} />
+            </ArrowContainer>
+          </BottomContainer>
+        </StaticContainer>
+      )}
+    </Slide.Data>
+  );
+};
 
 const StaticBgs = () => (
   <Slide.Data>
@@ -118,38 +153,50 @@ const StaticBgs = () => (
 const IntroSlide = g(Slide)({});
 IntroSlide.$isSlide = true;
 
-const FlexSlide = g(Slide)({display: "flex", flexDirection: "column"});
+const FlexSlide = g(Slide)({display: "flex", flexDirection: "column", color: "#796c69"});
+const Title = g.h1({fontSize: "6vh", padding: "5vh 5vw 0", color: cols[0]});
+const SlideContent = g.div({
+  position: "relative",
+  padding: "2.5vh 5vw 5vh",
+  margin: "auto 0",
+  fontSize: "4vw",
+});
 
-const KSlide = ({children, title, bgCss, ...rest}) => (
+const KSlide = ({children, title, ...rest}) => (
   <FlexSlide {...rest}>
     <Slide.Data>
-      {({offset}) => (
-        <g.H1
-          color="#002c44"
-          fontSize="4.5vh"
-          paddingTop="5.5vh"
-          paddingLeft="5vw"
-          style={{opacity: 1 - Math.min(1, Math.abs(offset))}}
-        >
-          {title}
-        </g.H1>
+      {({offset, params}) => (
+        <React.Fragment>
+          <Title
+            style={{
+              opacity: 1 - Math.min(1, Math.abs(offset)),
+            }}
+          >
+            {title}
+          </Title>
+          <SlideContent style={{opacity: 1 - Math.min(1, Math.abs(offset))}}>
+            {children}
+          </SlideContent>
+        </React.Fragment>
       )}
     </Slide.Data>
-    <g.Div position="relative" flex="auto" css={bgCss}>
-      {children}
-    </g.Div>
   </FlexSlide>
 );
+
 KSlide.$isSlide = true;
 
 const Container = g.div({width: "100vw", height: "100vh"});
+const MainTitle = g.div({
+  fontSize: "3vw",
+  " b": {fontSize: "5vw"},
+});
 class App extends React.Component {
   render() {
     return (
       <Container>
         <Controller navigator={navigator}>
-          {(index, setIndex) => (
-            <KeyboardController index={index} setIndex={setIndex}>
+          {({index, prev, next}) => (
+            <KeyboardController prev={prev} next={next}>
               <Master
                 index={index}
                 defaultParams={{
@@ -171,12 +218,20 @@ class App extends React.Component {
                       height: "100%",
                     }}
                   >
-                    Hi
+                    <MainTitle>
+                      <div>
+                        <b>Embracing the render method</b>
+                      </div>
+                      <div>an unconventional approach to data fetching</div>
+                    </MainTitle>
                   </Slide.Tile>
                 </IntroSlide>
 
                 <KSlide title="About myself" masterParams={{themeCol: cols[0]}}>
-                  I'm Daniel
+                  <SlideStepper>
+                    <Step>I'm Daniel</Step>
+                    <Step>I work at Codecks</Step>
+                  </SlideStepper>
                 </KSlide>
 
                 <KSlide title="About this talk" masterParams={{themeCol: cols[0]}}>
@@ -296,7 +351,7 @@ class App extends React.Component {
                   4
                 </KSlide>
 
-                <Statics nextSlide={() => setIndex(index + 1)} />
+                <Statics />
               </Master>
             </KeyboardController>
           )}

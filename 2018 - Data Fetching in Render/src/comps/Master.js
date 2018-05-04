@@ -47,6 +47,8 @@ class Master extends React.Component {
     slideController: PropTypes.object,
   };
 
+  activeSlide = null;
+
   componentWillMount() {
     let count = 0;
     React.Children.forEach(this.props.children, child => {
@@ -55,8 +57,12 @@ class Master extends React.Component {
     this.context.slideController.setSlideCount(count);
   }
 
+  handleActiveSlide = n => {
+    console.log("activeSlide", n);
+  };
+
   renderChildren(interpolatedIndex) {
-    const {children, defaultParams} = this.props;
+    const {children, defaultParams, index: targetIndex} = this.props;
     const windowSize = 0;
     let index = 0;
     let isExact;
@@ -73,6 +79,7 @@ class Master extends React.Component {
         return React.cloneElement(child, {
           index: currentIndex,
           offset: currentIndex - interpolatedIndex,
+          isActiveSlide: index - 1 === targetIndex,
         });
       } else {
         return child;

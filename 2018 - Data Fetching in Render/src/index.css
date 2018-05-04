@@ -2,7 +2,7 @@ html {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   box-sizing: border-box;
-  transition-duration: 0.15s;
+  transition-duration: 0.25s;
   transition-timing-function: ease-out;
   background-size: cover;
   background-position: 50% 50%;

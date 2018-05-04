@@ -1,6 +1,6 @@
 import React from "react";
-import g from "glamorous";
 import PropTypes from "prop-types";
+import g from "glamorous";
 
 const Container = g.div({
   position: "absolute",
@@ -18,9 +18,9 @@ class Slide extends React.Component {
   };
 
   getChildContext() {
-    const {offset, index} = this.props;
+    const {offset, index, isActiveSlide} = this.props;
     return {
-      slide: {offset, index},
+      slide: {offset, index, isActiveSlide},
     };
   }
 
@@ -90,6 +90,7 @@ class Tile extends React.Component {
       fromTop,
       fromBottom,
       fromLeft,
+      css,
       zIndex,
     } = this.props;
     const val = staggered[order].val - index;
@@ -109,6 +110,7 @@ class Tile extends React.Component {
           bottom: b && `${b}vh`,
           right: r && `${r}vw`,
           zIndex,
+          ...css,
         }}
       >
         {children}
