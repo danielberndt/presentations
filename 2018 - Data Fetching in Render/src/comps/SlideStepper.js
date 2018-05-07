@@ -69,11 +69,25 @@ const StepComp = g.ul({
   ":not(:last-child)": {marginBottom: "1vh"},
 });
 
-export const Step = ({progress, style, children, ...rest}) => (
-  <StepComp
-    style={{opacity: progress, transform: `translate3d(${(1 - progress) * 2}vw,0,0)`, ...style}}
-    {...rest}
-  >
+export const Step = ({style, children, ...rest}) => (
+  <RawStep comp={StepComp} {...rest}>
     <li>{children}</li>
-  </StepComp>
+  </RawStep>
 );
+
+export const RawStep = ({
+  progress = 1,
+  style,
+  comp: Comp = "div",
+  fromTop,
+  fromBottom,
+  fromLeft,
+  ...rest
+}) => {
+  let transform;
+  if (fromTop) transform = `translate3d(0,${(1 - progress) * -2}vh,0)`;
+  else if (fromBottom) transform = `translate3d(0,${(1 - progress) * 2}vh,0)`;
+  else if (fromLeft) transform = `translate3d(${(1 - progress) * -2}vw,0,0)`;
+  else transform = `translate3d(${(1 - progress) * 2}vw,0,0)`;
+  return <Comp style={{opacity: progress, transform, ...style}} {...rest} />;
+};

@@ -6,7 +6,9 @@ import Slide from "./comps/Slide";
 import FullScreen from "./comps/FullScreen";
 import KeyboardController from "./comps/KeyboardController";
 import createHistoryNavigator from "./lib/navigator";
-import SlideStepper, {Step} from "./comps/SlideStepper";
+import SlideStepper, {Step, RawStep} from "./comps/SlideStepper";
+import Arrow from "./Arrow";
+import Code, {codeStyle} from "./Code";
 
 const navigator = createHistoryNavigator();
 
@@ -48,9 +50,9 @@ const BottomContainer = g.div({
 const parts = [
   {slidesCount: 2, label: "Intro"},
   {slidesCount: 3, label: "Styles"},
-  {slidesCount: 3, label: "Rest vs GraphQl"},
-  {slidesCount: 14, label: "Inline-Fetching"},
-  {slidesCount: 3, label: "Outro"},
+  {slidesCount: 3, label: "Data Fetching"},
+  {slidesCount: 15, label: "Inline Fetching"},
+  {slidesCount: 4, label: "Outro"},
 ];
 
 const NavItem = g.div(({slidesCount, col}) => ({
@@ -66,19 +68,6 @@ const NavItemContent = g.div(({active}) => ({
   textTransform: "uppercase",
   transitionProperty: "color",
 }));
-
-const Arrow = g.div({
-  position: "absolute",
-  bottom: "100%",
-  width: 0,
-  height: 0,
-  borderColor: "transparent",
-  borderStyle: "solid",
-  left: "50%",
-  marginLeft: "-1vh",
-  borderTopWidth: 0,
-  borderWidth: "1vh",
-});
 
 const ArrowContainer = g.div({
   position: "absolute",
@@ -126,7 +115,7 @@ const Statics = () => {
                 transform: `translate3d(${100 / (slideCount - 1) * (interpolatedIndex - 1)}vw,0,0)`,
               }}
             >
-              <Arrow style={{borderBottomColor: params.themeCol}} />
+              <Arrow pointTo="top" size="1vh" style={{borderBottomColor: params.themeCol}} />
             </ArrowContainer>
           </BottomContainer>
         </StaticContainer>
@@ -154,18 +143,30 @@ const IntroSlide = g(Slide)({});
 IntroSlide.$isSlide = true;
 
 const FlexSlide = g(Slide)({display: "flex", flexDirection: "column", color: "#796c69"});
-const Title = g.h1({fontSize: "6vh", padding: "5vh 5vw 0", color: cols[0]});
+const Title = g.h1({
+  fontSize: "6vh",
+  padding: "5vh 5vw 0",
+  color: cols[0],
+  letterSpacing: "-0.05em",
+  lineHeight: 1.1,
+  " small": {
+    fontSize: "3vh",
+    opacity: 0.8,
+    fontWeight: "normal",
+  },
+});
 const SlideContent = g.div({
-  position: "relative",
   padding: "2.5vh 5vw 5vh",
   margin: "auto 0",
-  fontSize: "4vw",
+  fontSize: "4vh",
+  lineHeight: 1.3,
+  letterSpacing: "-0.1em",
 });
 
-const KSlide = ({children, title, ...rest}) => (
+const KSlide = ({children, title, contentCss, outerCss, ...rest}) => (
   <FlexSlide {...rest}>
     <Slide.Data>
-      {({offset, params}) => (
+      {({offset, params, getStaggered}) => (
         <React.Fragment>
           <Title
             style={{
@@ -174,8 +175,16 @@ const KSlide = ({children, title, ...rest}) => (
           >
             {title}
           </Title>
-          <SlideContent style={{opacity: 1 - Math.min(1, Math.abs(offset))}}>
-            {children}
+          <SlideContent
+            style={{
+              opacity: 1 - Math.min(1, Math.abs(getStaggered(2))),
+              transform: `translate3d(${getStaggered(2) * -20}vw,0,0)`,
+            }}
+            css={outerCss}
+          >
+            <g.Div position="relative" css={contentCss}>
+              {children}
+            </g.Div>
           </SlideContent>
         </React.Fragment>
       )}
@@ -190,6 +199,65 @@ const MainTitle = g.div({
   fontSize: "3vw",
   " b": {fontSize: "5vw"},
 });
+
+const Img = g.img({
+  maxWidth: "100%",
+  boxShadow: "0 0 2vw -0.5vw rgba(0,0,0,0.8)",
+  display: "block",
+});
+
+const InlineCode = g.code(codeStyle, {display: "inline-block", color: "#0f79a0"});
+
+const Scale = g.div({
+  position: "absolute",
+  top: 0,
+  left: 0,
+  width: "4vw",
+  bottom: 0,
+  background: "linear-gradient(to bottom, #e7926a 0%,#f7c294 33%,#80d4f1 66%,#3ec0f1 100%)",
+});
+
+const ScaleDesc = g.div({
+  marginBottom: "auto",
+  fontSize: "2.5vw",
+});
+
+const OuterScaleArrow = g.div({position: "absolute"});
+const scaleArrowShared = {
+  transform: "rotate(270deg)",
+  width: "80vh",
+  position: "relative",
+  letterSpacing: "-0.3vh",
+  fontSize: "3vh",
+  lineHeight: 1,
+  display: "flex",
+  alignItems: "center",
+};
+const ScaleArrowUpInner = g.div(scaleArrowShared, {
+  transformOrigin: "top right",
+  justifyContent: "flex-end",
+  left: "-5vw",
+});
+const ScaleArrowDownInner = g.div(scaleArrowShared, {transformOrigin: "bottom left", left: "3vw"});
+
+const ScaleArrowUp = ({children, ...rest}) => (
+  <OuterScaleArrow css={{top: 0, right: 0}} {...rest}>
+    <ScaleArrowUpInner>
+      <Arrow pointTo="right" size="1.5vh" color={cols[0]} css={{marginLeft: "1vh"}} />
+      {children}
+    </ScaleArrowUpInner>
+  </OuterScaleArrow>
+);
+
+const ScaleArrowDown = ({children, ...rest}) => (
+  <OuterScaleArrow css={{bottom: 0, left: "100%"}} {...rest}>
+    <ScaleArrowDownInner>
+      <Arrow pointTo="left" size="1.5vh" color={cols[4]} css={{marginRight: "1vh"}} />
+      {children}
+    </ScaleArrowDownInner>
+  </OuterScaleArrow>
+);
+
 class App extends React.Component {
   render() {
     return (
@@ -227,85 +295,421 @@ class App extends React.Component {
                   </Slide.Tile>
                 </IntroSlide>
 
-                <KSlide title="About myself" masterParams={{themeCol: cols[0]}}>
+                <KSlide title="About Myself" masterParams={{themeCol: cols[0]}}>
                   <SlideStepper>
                     <Step>I'm Daniel</Step>
-                    <Step>I work at Codecks</Step>
+                    <Step>Full-Time Web-Dev since 2012, working with React since v0.12</Step>
+                    <Step>
+                      Current project:{" "}
+                      <b>
+                        <a href="https://www.codecks.io">codecks.io</a>
+                      </b>
+                      <Img
+                        src={require("./images/cdx-screen.png")}
+                        alt="codecks screen"
+                        css={{maxHeight: "50vh", marginTop: "2vh"}}
+                      />
+                    </Step>
                   </SlideStepper>
                 </KSlide>
 
-                <KSlide title="About this talk" masterParams={{themeCol: cols[0]}}>
-                  Last event conversation with karl about whether I'm using GraphQL – Not quite.
+                <KSlide title="About this Talk" masterParams={{themeCol: cols[0]}}>
+                  <SlideStepper>
+                    <Step>Talking with Karl Horky – co-organiser of last React Open Source.</Step>
+                    <Step css={{marginLeft: "5vw"}}>"So, have you been working with GraphQL?"</Step>
+                    <Step css={{marginLeft: "5vw"}}>"Not quite..."</Step>
+                    <Step css={{marginLeft: "5vw"}}>
+                      "You definitely should give a talk about this!"
+                    </Step>
+                  </SlideStepper>
                 </KSlide>
 
                 <KSlide
-                  title="How the paradigm shift towards components affect the way we work with styles"
+                  title={
+                    <React.Fragment>
+                      <small>Let's start with something else:</small>
+                      <br />Components and CSS - A little History
+                    </React.Fragment>
+                  }
                   masterParams={{themeCol: cols[1]}}
                 >
-                  <ul>
-                    <li>- first: `require("styles.css")`</li>
-                    <li>- it's all about finding nice names. And naming is hard.</li>
-                    <li>
-                      - syntactic/semantic/atomic "huge-red-button" vs "cta-button" vs "white bg-red
-                      pa2"
-                    </li>
-                    <li>- avoiding name collisions via namespacing: OOCSS vs SMACSS vs BEM</li>
-                    <li>
-                      - find good names for boxes that serve just pure layouting purposes:
-                      ".inner-element-container"
-                    </li>
-                  </ul>
+                  <SlideStepper>
+                    <Step>
+                      In the beginning was <InlineCode>require("my-component.css")</InlineCode>
+                    </Step>
+                    <Step>
+                      Avoiding name collisions via namespacing:<br />
+                      <b>OOCSS</b> vs <b>SMACSS</b> vs <b>BEM</b> vs ...
+                    </Step>
+                    <Step>
+                      Syntactic/semantic/atomic class names{" "}
+                      <InlineCode>"huge-red-button"</InlineCode> vs{" "}
+                      <InlineCode>"cta-button"</InlineCode> vs{" "}
+                      <InlineCode>"white bg-red pa2"</InlineCode>
+                    </Step>
+                    <Step>Naming is hard</Step>
+                  </SlideStepper>
                 </KSlide>
 
-                <KSlide title="css-in-js to solve the issues" masterParams={{themeCol: cols[1]}}>
-                  [include slide from vjeux]
+                <KSlide
+                  title={
+                    <React.Fragment>
+                      <small>Vjeux infamous Talk in 2014:</small>
+                      <br />Css-in-js to Solve these Issues
+                    </React.Fragment>
+                  }
+                  masterParams={{themeCol: cols[1]}}
+                  contentCss={centerCss}
+                >
+                  <Img
+                    src={require("./images/css-in-js-by-vjeux.png")}
+                    alt="issues with css at scale"
+                    css={{maxHeight: "60vh"}}
+                  />
                 </KSlide>
 
-                <KSlide title="There's a scale!" masterParams={{themeCol: cols[1]}}>
-                  <pre>
-                    1. Global styles 2. automatically namespaced style in extra file (css modules,
-                    css-blocks) 3. colocated styles in same file (aphrodite/styled-components)
-                    (glamorous/emotion) 4. inline styles (jsx-styles) two arrows: to left: easier
-                    compilation-time optimisations to right: less "moving" parts
-                  </pre>
+                <KSlide
+                  title="Let's organise it a bit"
+                  masterParams={{themeCol: cols[1]}}
+                  outerCss={{
+                    flex: "auto",
+                    paddingTop: "8vh",
+                    paddingBottom: "10vh",
+                    paddingRight: "10vw",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                  contentCss={{
+                    display: "flex",
+                    flex: "auto",
+                    paddingLeft: "6vw",
+                    paddingRight: "6vw",
+                    flexDirection: "column",
+                  }}
+                >
+                  <SlideStepper>
+                    <RawStep comp={Scale} />
+                    <RawStep comp={ScaleDesc} css={{order: 1}}>
+                      Global styles <InlineCode>css</InlineCode> <InlineCode>less</InlineCode>{" "}
+                      <InlineCode>sass</InlineCode>
+                    </RawStep>
+                    <RawStep comp={ScaleDesc} css={{order: 5, marginBottom: 0}}>
+                      Inline styles <InlineCode>jsx-styles</InlineCode>
+                    </RawStep>
+                    <RawStep comp={ScaleDesc} css={{order: 2}}>
+                      Colocated styles in extra file<br />
+                      <InlineCode>css modules</InlineCode> <InlineCode>css-blocks</InlineCode>
+                    </RawStep>
+                    <RawStep comp={ScaleDesc} css={{order: 3}}>
+                      Colocated styles in same file<br />
+                      <InlineCode>aphrodite</InlineCode> <InlineCode>styled-components</InlineCode>
+                    </RawStep>
+                    <RawStep comp={ScaleDesc} css={{order: 4}}>
+                      <InlineCode>glamorous</InlineCode> <InlineCode>emotion</InlineCode>
+                    </RawStep>
+                    <RawStep comp={ScaleArrowUp} fromBottom>
+                      Easier compilation-time optimisations
+                    </RawStep>
+                    <RawStep comp={ScaleArrowDown} fromTop>
+                      Less "moving" parts
+                    </RawStep>
+                  </SlideStepper>
                 </KSlide>
 
-                <KSlide title="What about data-fetching?" masterParams={{themeCol: cols[2]}}>
-                  2
+                <KSlide title="Let's talk about Data-Fetching" masterParams={{themeCol: cols[2]}}>
+                  <SlideStepper>
+                    <Step>
+                      Classical model: <b>REST</b>-Api
+                    </Step>
+                    <Step>
+                      Big disconnect between frontend and backend. Not just across files, oftentimes
+                      across team-boundaries
+                    </Step>
+                    <Step>
+                      Again – naming is hard:<br />
+                      <InlineCode>POST</InlineCode> vs <InlineCode>PUT</InlineCode> vs{" "}
+                      <InlineCode>PATCH</InlineCode>
+                      <br />
+                      <InlineCode>/users/123/notifications</InlineCode> vs{" "}
+                      <InlineCode>notifications?userId=123</InlineCode>
+                    </Step>
+                  </SlideStepper>
                 </KSlide>
-                <KSlide title="GraphQL to the rescue" masterParams={{themeCol: cols[2]}}>
-                  2
+                <KSlide title="GraphQL to the Rescue" masterParams={{themeCol: cols[2]}}>
+                  <SlideStepper>
+                    <RawStep>
+                      Let's collocate the data to fetch with the component that renders the data!
+                    </RawStep>
+                    <RawStep comp={Code} css={{fontSize: "0.7em"}}>{`
+const GET_USER = gql\`
+{
+  user(id: $id) {
+    firstName
+    lastName
+  }
+}
+\`
+const Profile = ({id}) => (
+  <Query query={GET_USER} variables={{id}}>
+    {({loading, data: {user}}) => !loading && (
+        <div>
+          Hello, {user.firstName} {user.lastName}!
+        </div>
+      )}
+  </Query>
+)
+                  `}</RawStep>
+                  </SlideStepper>
                 </KSlide>
-                <KSlide title="Let's look at the scale" masterParams={{themeCol: cols[2]}}>
-                  2
+                <KSlide
+                  title="Let's re-use the Schema from before"
+                  masterParams={{themeCol: cols[2]}}
+                  outerCss={{
+                    flex: "auto",
+                    paddingTop: "12vh",
+                    paddingBottom: "14vh",
+                    paddingRight: "10vw",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                  contentCss={{
+                    display: "flex",
+                    flex: "auto",
+                    paddingLeft: "6vw",
+                    paddingRight: "6vw",
+                    flexDirection: "column",
+                  }}
+                >
+                  <SlideStepper>
+                    <RawStep comp={Scale} />
+                    <RawStep comp={ScaleDesc}>
+                      Strict separation between backend and frontend<br />
+                      <InlineCode>REST Api</InlineCode>
+                    </RawStep>
+                    <RawStep comp={ScaleDesc}>
+                      Colocated data-definition in same file<br />
+                      <InlineCode>GraphQL</InlineCode>
+                    </RawStep>
+                    <RawStep comp={ScaleDesc} css={{marginBottom: 0}}>
+                      Inline data-definition<br />
+                      <InlineCode>???</InlineCode>
+                    </RawStep>
+                    <RawStep comp={ScaleArrowUp} fromBottom>
+                      Easier compilation-time optimisations
+                    </RawStep>
+                    <RawStep comp={ScaleArrowDown} fromTop>
+                      Less "moving" parts
+                    </RawStep>
+                  </SlideStepper>
                 </KSlide>
 
                 <KSlide title="Inline fetching" masterParams={{themeCol: cols[3]}}>
-                  3
+                  <SlideStepper>
+                    <RawStep>Wouldn't it be nice to just do something like this?</RawStep>
+                    <RawStep comp={Code}>
+                      {`
+const Profile = ({id}) => {
+  const user = getInstance("User", id);
+  return (
+    <div>
+      Hello, {user.firstName} {user.lastName}!
+    </div>
+  )
+}
+`}
+                    </RawStep>
+                  </SlideStepper>
                 </KSlide>
                 <KSlide title="Inline Fetching Example 2" masterParams={{themeCol: cols[3]}}>
-                  3
+                  <SlideStepper>
+                    <RawStep comp={Code} css={{fontSize: "0.75em"}}>
+                      {`
+                  const Profile = ({id}) => {
+  const user = getInstance("User", id);
+  return (
+    <div>
+      Hello, <Avatar user={user}/>
+      <div>
+        {user.posts.map(post => <Post post={post}/>)}
+      </div>
+    </div>
+  )
+}
+`}
+                    </RawStep>
+                    <RawStep comp={Code} css={{fontSize: "0.75em"}}>
+                      {`
+const Avatar = ({user}) => (
+  <img src={user.profileImage.url} alt={user.firstName}/>
+)}
+`}
+                    </RawStep>
+                    <RawStep comp={Code} css={{fontSize: "0.75em"}}>{`
+const Post = ({post}) => (
+  <div>{post.title} - {post.comments.length} comments</h1>
+)
+                  `}</RawStep>
+                  </SlideStepper>
                 </KSlide>
                 <KSlide title="Why is this appealing?" masterParams={{themeCol: cols[3]}}>
-                  3
+                  <SlideStepper>
+                    <Step>No duplicate information of field names</Step>
+                    <Step>Easy to compose</Step>
+                    <Step>Easy to move code around</Step>
+                  </SlideStepper>
                 </KSlide>
                 <KSlide title="How could this be implemented?" masterParams={{themeCol: cols[3]}}>
-                  3
+                  <SlideStepper>
+                    <Step>Compilation step?</Step>
+                    <Step>
+                      This is quite hard. Quite brittle, requires proper type system, worth
+                      investigating though
+                    </Step>
+                    <Step>
+                      Instead: Model Schema & <InlineCode>Object.defineProperty</InlineCode>
+                    </Step>
+                  </SlideStepper>
                 </KSlide>
                 <KSlide title="Model Schema?" masterParams={{themeCol: cols[3]}}>
-                  3
+                  <SlideStepper>
+                    <RawStep>
+                      When defining GraphQL model we specify what fields and relationships our
+                      models/types have:
+                    </RawStep>
+                    <RawStep comp={Code} type="gql" css={{fontSize: "0.8em"}}>{`
+type User {
+  firstName: String
+  lastName: String
+  profileImage: File
+  posts: [Post]
+}
+
+type File {
+  url: String
+}
+
+type Post {
+  title: String
+  comments: [Comment]
+}
+`}</RawStep>
+                  </SlideStepper>
                 </KSlide>
                 <KSlide title="Object.defineProperty?" masterParams={{themeCol: cols[3]}}>
-                  3
+                  <SlideStepper>
+                    <RawStep>Introduced with ES5 (IE9 support!)</RawStep>
+                    <RawStep comp={Code} css={{fontSize: "0.8em"}}>{`
+const getUser = (id) => {
+  const user = {}
+
+  Object.defineProperty(user, 'firstName', {
+    writable: false,
+    get() {
+      return "Hans"
+    }
+  })
+
+  return user;
+}
+// user.firstName --> "Hans"
+                    `}</RawStep>
+                  </SlideStepper>
+                </KSlide>
+                <KSlide title="More realistic Example" masterParams={{themeCol: cols[3]}}>
+                  <SlideStepper>
+                    <RawStep>Assuming we have a client-side cache for loaded models</RawStep>
+                    <RawStep comp={Code} css={{fontSize: "0.8em"}}>{`
+...
+get() {
+  if (cache.has("User", id, "firstName")) {
+    return cache.get("User", id, "firstName")
+  } else {
+    queueRequest("User", id, "firstName")
+    return "loading"
+  }
+}
+...
+// user.firstName --> "loading" + queuing request for firstName
+                    `}</RawStep>
+                  </SlideStepper>
                 </KSlide>
                 <KSlide
-                  title="Object.defineProperty for relations"
+                  title="Object.defineProperty for Relations"
                   masterParams={{themeCol: cols[3]}}
                 >
-                  3
+                  <SlideStepper>
+                    <RawStep>If we assume that the cache is pre-filled:</RawStep>
+                    <RawStep comp={Code} css={{fontSize: "0.8em"}}>{`
+const getUser = (id) => {
+  const user = {}
+
+  Object.defineProperty(user, 'profileImage', {
+    writable: false,
+    get() {
+      const fileId = cache.get("User", id, "profileImage");
+      return getInstance("File", fileId);
+    }
+  })
+
+  return user;
+}
+`}</RawStep>
+                  </SlideStepper>
+                </KSlide>
+                <KSlide
+                  title="More realistic Code for Relations"
+                  masterParams={{themeCol: cols[3]}}
+                >
+                  <Code css={{fontSize: "0.8em"}}>
+                    {`
+...
+get() {
+  if (cache.has("User", id, "profileImage"))
+    const fileId = cache.get("User", id, "profileImage");
+    return getInstance("File", fileId);
+  } else {
+    queueRequest("User", id, "profileImage");
+    const nestedId = \`user(id: \${id}).profileImage\`;
+    return getInstance("File", nestedId)
+  }
+}
+...
+`}
+                  </Code>
                 </KSlide>
                 <KSlide title="Combining them" masterParams={{themeCol: cols[3]}}>
-                  3
+                  <SlideStepper>
+                    <RawStep>
+                      Based on the schema, we are able to automatically generate
+                      instance-constructors:
+                    </RawStep>
+                    <RawStep comp={Code} css={{fontSize: "0.5em", letterSpacing: "-0.1vw"}}>{`
+const schema = {
+  User: {
+    fields = {
+      "firstName": {type: "String"},
+      "lastName": {type: "String"}
+    },
+    relations = {
+      profileImage: {type: "File", isList: false},
+      posts: {type: "Post", isList: true}
+    }
+  }
+}`}</RawStep>
+                    <RawStep comp={Code} css={{fontSize: "0.5em", letterSpacing: "-0.1vw"}}>{`
+const getInstance = (type, id) => {
+  const instance = {};
+  Object.entries(schema[type].fields).forEach(([fieldName, info]) => {
+    Object.defineProperty(user, fieldName, {...});
+  });
+
+  Object.entries(schema[type].relations).forEach(([relationName, info]) => {
+    Object.defineProperty(user, relationName, {...});
+  });
+  return instance;
+}
+`}</RawStep>
+                  </SlideStepper>
                 </KSlide>
                 <KSlide
                   title="How does it work within the render method?"
@@ -314,41 +718,161 @@ class App extends React.Component {
                   3
                 </KSlide>
                 <KSlide
-                  title="Advanced patterns: load data whenever you need it"
+                  title={
+                    <React.Fragment>
+                      <small>Advanced Patterns:</small>
+                      <br />Load Data only when you need it
+                    </React.Fragment>
+                  }
                   masterParams={{themeCol: cols[3]}}
                 >
-                  3
+                  <Code>{`
+const Post = ({post}) => (
+  <div>
+    <Tooltip onHover={() => \`created by \${post.author.firstName}\`}>
+      {post.title}
+    </Tooltip>
+  </div>
+)
+                    `}</Code>
                 </KSlide>
                 <KSlide
-                  title="Advanced patterns: Check if data is loaded"
+                  title={
+                    <React.Fragment>
+                      <small>Advanced Patterns:</small>
+                      <br />Check if Data is loaded
+                    </React.Fragment>
+                  }
                   masterParams={{themeCol: cols[3]}}
                 >
-                  3
+                  <Code>{`
+const Post = ({post}) => (
+  <Spinner isActive={!post.$meta.inCache("title", "content")}>
+    <h1>{post.title}</h1>
+    <div>{post.content}</div>
+  </Spinner>
+)
+                `}</Code>
                 </KSlide>
                 <KSlide
-                  title="Advanced patterns: Conditionally load content in more than one pass"
+                  title={
+                    <React.Fragment>
+                      <small>Advanced Patterns:</small>
+                      <br />Conditionally load Content in more than one Pass
+                    </React.Fragment>
+                  }
                   masterParams={{themeCol: cols[3]}}
                 >
-                  3
-                </KSlide>
-                <KSlide title="Advanced patterns: Using helpers" masterParams={{themeCol: cols[3]}}>
-                  3
+                  <SlideStepper>
+                    <RawStep comp={Code}>{`
+const User = ({user}) => (
+  <div>
+    <h1>{user.firstName}</h1>
+    {user.role === "admin" && <span>{user.profileImage.url}</span>}
+  </div>
+)`}</RawStep>
+                    <RawStep comp={Code}>{`
+// First Pass
+queueRequest("User", 5, "firstName");
+queueRequest("User", 5, "role");
+`}</RawStep>
+                    <RawStep comp={Code}>{`
+// Second Pass (if role === "admin")
+queueRequest("User", 5, "profileImage");
+queueRequest("File", "user(id: 5).profileImage" , "url");
+`}</RawStep>
+                  </SlideStepper>
                 </KSlide>
                 <KSlide
-                  title="Outlook into the future: Suspense"
                   masterParams={{themeCol: cols[3]}}
+                  title={
+                    <React.Fragment>
+                      <small>Advanced Patterns:</small>
+                      <br />Using helpers
+                    </React.Fragment>
+                  }
                 >
-                  3
+                  <Code>{`
+const Posts = ({user}) => (
+  <div>
+    <div>{user.firstName} made {user.$meta.count("posts")} posts</div>
+    <h2>Last Post</h2>
+    <div>{user.$meta.last("posts").title}</div>
+  </div>
+)
+                    `}</Code>
+                </KSlide>
+                <KSlide
+                  title={
+                    <React.Fragment>
+                      <small>Outlook into the future:</small>
+                      <br />Suspense
+                    </React.Fragment>
+                  }
+                  masterParams={{themeCol: cols[4]}}
+                >
+                  <Code>{`
+const requestQueue = [];
+
+const DataProvider = () => {
+  const content = this.props.children();
+  if (requestQueue.length === 0) {
+    return content
+  } else {
+    const promise = fetchData(requestQueue);
+    throw promise;
+  }
+}
+                    `}</Code>
                 </KSlide>
 
                 <KSlide title="Caveats" masterParams={{themeCol: cols[4]}}>
-                  4
+                  <SlideStepper>
+                    <Step>
+                      When seeing <InlineCode>user.profileImage.url</InlineCode> you don't really
+                      know whether it's been loaded yet or not.<br />Always call something{" "}
+                      <InlineCode>user.profileImage.$meta.inCache("url")</InlineCode> to be sure
+                    </Step>
+                    <Step>
+                      On first render, it'll render all components and fill them with the default
+                      values (e.g. "loading"). Could look awkward, can be benefitial for perceived
+                      performance though
+                    </Step>
+                    <Step>Hard to apply caching since queries are generated on the fly</Step>
+                    <Step>... no available open source solution</Step>
+                  </SlideStepper>
                 </KSlide>
                 <KSlide title="What's next" masterParams={{themeCol: cols[4]}}>
-                  4
+                  <SlideStepper>
+                    <Step>
+                      I won't be able to responsibly open source my code. Too big a scope, too
+                      little time.
+                    </Step>
+                    <Step>
+                      Feel inspired to play around with the idea. I'm happy to help with e.g.
+                      mutations & optimistic updates, real-time updates, immutability of instances
+                    </Step>
+                    <Step>
+                      Take a look at an implementation on either{" "}
+                      <b>
+                        <a href="https://www.codecks.io">www.codecks.io</a>
+                      </b>{" "}
+                      or{" "}
+                      <b>
+                        <a href="https://piq.codeus.net">piq.codeus.net</a>
+                      </b>
+                    </Step>
+                  </SlideStepper>
                 </KSlide>
-                <KSlide title="Thanks!" masterParams={{themeCol: cols[4]}}>
-                  4
+                <KSlide
+                  title="Thanks!"
+                  masterParams={{themeCol: cols[4]}}
+                  contentCss={{fontSize: "3vw"}}
+                >
+                  Let's stay in touch!<br />
+                  <a href="https://twitter.com/D40B">
+                    twitter.com/<b>D40B</b>
+                  </a>
                 </KSlide>
 
                 <Statics />
