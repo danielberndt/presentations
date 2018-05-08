@@ -13,7 +13,9 @@
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
     "react-motion": "^0.5.2",
-    "react-scripts": "1.1.4"
+    "react-scripts": "1.1.4",
+    "typeface-fira-mono": "^0.0.54",
+    "typeface-fira-sans": "^0.0.54"
   },
   "scripts": {
     "start": "react-scripts start",

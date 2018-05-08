@@ -147,7 +147,6 @@ const Title = g.h1({
   fontSize: "6vh",
   padding: "5vh 5vw 0",
   color: cols[0],
-  letterSpacing: "-0.05em",
   lineHeight: 1.1,
   " small": {
     fontSize: "3vh",
@@ -160,7 +159,6 @@ const SlideContent = g.div({
   margin: "auto 0",
   fontSize: "4vh",
   lineHeight: 1.3,
-  letterSpacing: "-0.1em",
 });
 
 const KSlide = ({children, title, contentCss, outerCss, ...rest}) => (
@@ -227,7 +225,6 @@ const scaleArrowShared = {
   transform: "rotate(270deg)",
   width: "80vh",
   position: "relative",
-  letterSpacing: "-0.3vh",
   fontSize: "3vh",
   lineHeight: 1,
   display: "flex",
@@ -683,7 +680,7 @@ get() {
                       Based on the schema, we are able to automatically generate
                       instance-constructors:
                     </RawStep>
-                    <RawStep comp={Code} css={{fontSize: "0.5em", letterSpacing: "-0.1vw"}}>{`
+                    <RawStep comp={Code} css={{fontSize: "0.5em"}}>{`
 const schema = {
   User: {
     fields = {
@@ -696,7 +693,7 @@ const schema = {
     }
   }
 }`}</RawStep>
-                    <RawStep comp={Code} css={{fontSize: "0.5em", letterSpacing: "-0.1vw"}}>{`
+                    <RawStep comp={Code} css={{fontSize: "0.5em"}}>{`
 const getInstance = (type, id) => {
   const instance = {};
   Object.entries(schema[type].fields).forEach(([fieldName, info]) => {

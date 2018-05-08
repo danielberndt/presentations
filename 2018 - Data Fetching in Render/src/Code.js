@@ -3,9 +3,9 @@ import g from "glamorous";
 import Prism from "prismjs";
 import "prismjs/components/prism-jsx";
 import "prismjs/components/prism-graphql";
-// loadLanguages(["jsx", "typescript"]);
 
 export const codeStyle = {
+  fontFamily: "Fira Mono, monospace",
   fontSize: "0.85em",
   backgroundColor: "#d3eff9",
   color: "#2a5463",
