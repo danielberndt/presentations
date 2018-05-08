@@ -194,8 +194,9 @@ KSlide.$isSlide = true;
 
 const Container = g.div({width: "100vw", height: "100vh"});
 const MainTitle = g.div({
+  color: "rgba(255,255,255,0.8)",
   fontSize: "3vw",
-  " b": {fontSize: "5vw"},
+  " b": {fontSize: "5vw", color: "#fff"},
 });
 
 const Img = g.img({
@@ -309,17 +310,17 @@ class App extends React.Component {
                   >
                     <MainTitle>
                       <div>
-                        <b>Embracing the render method</b>
+                        <b>Embracing the Render Method</b>
                       </div>
-                      <div>an unconventional approach to data fetching</div>
+                      <div>An unconventional Approach to Data Fetching</div>
                     </MainTitle>
                   </Slide.Tile>
                 </IntroSlide>
 
-                <KSlide title="About Myself" masterParams={{themeCol: cols[0]}}>
+                <KSlide title="About myself" masterParams={{themeCol: cols[0]}}>
                   <SlideStepper>
                     <Step>I'm Daniel</Step>
-                    <Step>Full-Time Web-Dev since 2012, working with React since v0.12</Step>
+                    <Step>Full-time web-dev since 2012, working with React since v0.12</Step>
                     <Step>
                       Current project:{" "}
                       <b>
@@ -336,9 +337,11 @@ class App extends React.Component {
 
                 <KSlide title="About this Talk" masterParams={{themeCol: cols[0]}}>
                   <SlideStepper>
-                    <Step>Talking with Karl Horky – co-organiser of last React Open Source.</Step>
+                    <Step>
+                      Talking with Karl Horky – co-organiser at last React Open Source Event.
+                    </Step>
                     <Step css={{marginLeft: "5vw"}}>"So, have you been working with GraphQL?"</Step>
-                    <Step css={{marginLeft: "5vw"}}>"Not quite..."</Step>
+                    <Step css={{marginLeft: "5vw"}}>"Not quite, but ..."</Step>
                     <Step css={{marginLeft: "5vw"}}>
                       "You definitely should give a talk about this!"
                     </Step>
@@ -363,7 +366,7 @@ class App extends React.Component {
                       <b>OOCSS</b> vs <b>SMACSS</b> vs <b>BEM</b> vs ...
                     </Step>
                     <Step>
-                      Syntactic/semantic/atomic class names{" "}
+                      Syntactic vs semantic vs atomic class names{" "}
                       <InlineCode>"huge-red-button"</InlineCode> vs{" "}
                       <InlineCode>"cta-button"</InlineCode> vs{" "}
                       <InlineCode>"white bg-red pa2"</InlineCode>
@@ -390,7 +393,7 @@ class App extends React.Component {
                 </KSlide>
 
                 <KSlide
-                  title="Let's organise it a bit"
+                  title="The Spectrum of Styling Solutions"
                   masterParams={{themeCol: cols[1]}}
                   outerCss={{
                     flex: "auto",
@@ -440,26 +443,26 @@ class App extends React.Component {
                 <KSlide title="Let's talk about Data-Fetching" masterParams={{themeCol: cols[2]}}>
                   <SlideStepper>
                     <Step>
-                      Classical model: <b>REST</b>-Api
+                      Classic model: <b>REST</b>-Api
                     </Step>
                     <Step>
-                      Big disconnect between frontend and backend. Not just across files, oftentimes
+                      Disconnect between frontend and backend. Not just across files, oftentimes
                       across team-boundaries
                     </Step>
                     <Step>
-                      Again – naming is hard:<br />
+                      Again – Naming is hard:<br />
                       <InlineCode>POST</InlineCode> vs <InlineCode>PUT</InlineCode> vs{" "}
                       <InlineCode>PATCH</InlineCode>
                       <br />
                       <InlineCode>/users/123/notifications</InlineCode> vs{" "}
-                      <InlineCode>notifications?userId=123</InlineCode>
+                      <InlineCode>/notifications?userId=123</InlineCode>
                     </Step>
                   </SlideStepper>
                 </KSlide>
                 <KSlide title="GraphQL to the Rescue" masterParams={{themeCol: cols[2]}}>
                   <SlideStepper>
                     <RawStep>
-                      Let's collocate the data to fetch with the component that renders the data!
+                      Let's collocate the data to fetch with the component that renders the data
                     </RawStep>
                     <RawStep comp={Code} css={{fontSize: "0.7em"}}>{`
 const GET_USER = gql\`
@@ -468,8 +471,9 @@ const GET_USER = gql\`
     firstName
     lastName
   }
-}
-\`
+}\`
+`}</RawStep>
+                    <RawStep comp={Code} css={{fontSize: "0.7em"}}>{`
 const Profile = ({id}) => (
   <Query query={GET_USER} variables={{id}}>
     {({loading, data: {user}}) => !loading && (
@@ -483,7 +487,7 @@ const Profile = ({id}) => (
                   </SlideStepper>
                 </KSlide>
                 <KSlide
-                  title="Let's re-use the Schema from before"
+                  title="Re-using the Spectrum from before"
                   masterParams={{themeCol: cols[2]}}
                   outerCss={{
                     flex: "auto",
@@ -504,7 +508,7 @@ const Profile = ({id}) => (
                   <SlideStepper>
                     <RawStep comp={Scale} />
                     <RawStep comp={ScaleDesc}>
-                      Strict separation between backend and frontend<br />
+                      Separation between backend and frontend<br />
                       <InlineCode>REST Api</InlineCode>
                     </RawStep>
                     <RawStep comp={ScaleDesc}>
@@ -574,17 +578,17 @@ const Post = ({post}) => (
                 </KSlide>
                 <KSlide title="Why is this appealing?" masterParams={{themeCol: cols[3]}}>
                   <SlideStepper>
-                    <Step>No duplicate information of field names</Step>
+                    <Step>No separation between defining and using a specific data shape</Step>
                     <Step>Easy to compose</Step>
-                    <Step>Easy to move code around</Step>
+                    <Step>Easy to move code around or delete it</Step>
                   </SlideStepper>
                 </KSlide>
                 <KSlide title="How could this be implemented?" masterParams={{themeCol: cols[3]}}>
                   <SlideStepper>
                     <Step>Compilation step?</Step>
-                    <Step>
-                      This is quite hard. Quite brittle, requires proper type system, worth
-                      investigating though
+                    <Step css={{marginLeft: "5vw"}}>
+                      This is quite hard. Probably requires advanced type system. Worth
+                      investigating though.
                     </Step>
                     <Step>
                       Instead: Model Schema & <InlineCode>Object.defineProperty</InlineCode>
@@ -594,8 +598,7 @@ const Post = ({post}) => (
                 <KSlide title="Model Schema?" masterParams={{themeCol: cols[3]}}>
                   <SlideStepper>
                     <RawStep>
-                      When defining GraphQL model we specify what fields and relationships our
-                      models/types have:
+                      When defining GraphQL models, we specify the fields and relationships already
                     </RawStep>
                     <RawStep comp={Code} type="gql" css={{fontSize: "0.8em"}}>{`
 type User {
@@ -632,6 +635,8 @@ const getUser = (id) => {
 
   return user;
 }
+`}</RawStep>
+                    <RawStep comp={Code} css={{fontSize: "0.8em"}}>{`
 // user.firstName --> "Hans"
                     `}</RawStep>
                   </SlideStepper>
@@ -650,7 +655,9 @@ get() {
   }
 }
 ...
-// user.firstName --> "loading" + queuing request for firstName
+`}</RawStep>
+                    <RawStep comp={Code} css={{fontSize: "0.8em"}}>{`
+// user.firstName --> "loading" + queuing request for "firstName"
                     `}</RawStep>
                   </SlideStepper>
                 </KSlide>
@@ -908,8 +915,8 @@ const Posts = ({user}) => (
                   <Code>{`
 const requestQueue = [];
 
-const DataProvider = () => {
-  const content = this.props.children();
+const DataProvider = ({children}) => {
+  const content = children();
   if (requestQueue.length === 0) {
     return content
   } else {
