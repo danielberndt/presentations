@@ -6,7 +6,7 @@ import Slide from "./comps/Slide";
 import FullScreen from "./comps/FullScreen";
 import KeyboardController from "./comps/KeyboardController";
 import createHistoryNavigator from "./lib/navigator";
-import SlideStepper, {Step, RawStep} from "./comps/SlideStepper";
+import SlideStepper, {Step, RawStep, ScrollStep, SlideCarousel} from "./comps/SlideStepper";
 import Arrow from "./Arrow";
 import Code, {codeStyle} from "./Code";
 
@@ -253,6 +253,30 @@ const ScaleArrowDown = ({children, ...rest}) => (
       {children}
     </ScaleArrowDownInner>
   </OuterScaleArrow>
+);
+
+const OuterCarousel = g(SlideCarousel)({
+  overflow: "hidden",
+  maxHeight: "100%",
+  position: "relative",
+  padding: "5vh 1vw",
+  "::after": {
+    content: "''",
+    position: "absolute",
+    pointerEvents: "none",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    boxShadow: "inset 0 -5vh 3vh -2vh #fff, inset 0 5vh 3vh -2vh #fff",
+  },
+});
+
+const WithTopArrow = ({children, ...rest}) => (
+  <g.Div position="relative" paddingTop="2vw" {...rest}>
+    <Arrow pointTo="bottom" size="2vw" color={cols[2]} css={{top: 0}} />
+    {children}
+  </g.Div>
 );
 
 class App extends React.Component {
@@ -709,10 +733,83 @@ const getInstance = (type, id) => {
                   </SlideStepper>
                 </KSlide>
                 <KSlide
-                  title="How does it work within the render method?"
+                  title="Let's play it through"
                   masterParams={{themeCol: cols[3]}}
+                  outerCss={{
+                    flex: "auto",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                  contentCss={{
+                    display: "flex",
+                    flexDirection: "column",
+                    flex: "auto",
+                  }}
                 >
-                  3
+                  <OuterCarousel>
+                    <ScrollStep>
+                      {(style, ref) => (
+                        <Code innerRef={ref} style={style}>{`
+render() {
+  const user = getInstance("User", this.props.userId)
+  return <span>{user.firstName} - {user.profileImage.url}</span>
+}
+                    `}</Code>
+                      )}
+                    </ScrollStep>
+                    <ScrollStep>
+                      {(style, ref) => (
+                        <WithTopArrow innerRef={ref} style={style}>
+                          <Code>{`
+queueRequest("User", 5, "firstName");
+queueRequest("User", 5, "profileImage");
+queueRequest("File", "user(id: 5).profileImage", "url");
+
+// renders <span>loading - loading</span>
+                    `}</Code>
+                        </WithTopArrow>
+                      )}
+                    </ScrollStep>
+                    <ScrollStep>
+                      {(style, ref) => (
+                        <WithTopArrow innerRef={ref} style={style}>
+                          <Code type="gql">{`
+{
+  user(id: 5) {
+    firstName
+    profileImage {
+      url
+    }
+  }
+}
+                    `}</Code>
+                        </WithTopArrow>
+                      )}
+                    </ScrollStep>
+                    <ScrollStep>
+                      {(style, ref) => (
+                        <WithTopArrow innerRef={ref} style={style}>
+                          <g.Div textAlign="center" margin="2vh 0 3vh">
+                            Fetch from server & Fill client cache
+                          </g.Div>
+                        </WithTopArrow>
+                      )}
+                    </ScrollStep>
+                    <ScrollStep>
+                      {(style, ref) => (
+                        <WithTopArrow innerRef={ref} style={style}>
+                          <Code>{`
+render() {
+  const user = getInstance("User", this.props.userId)
+  return <span>{user.firstName} - {user.profileImage.url}</span>
+}
+
+// renders <span>Hans - https://example.com/1.png</span>
+                    `}</Code>
+                        </WithTopArrow>
+                      )}
+                    </ScrollStep>
+                  </OuterCarousel>
                 </KSlide>
                 <KSlide
                   title={

@@ -55,9 +55,9 @@ export default class Code extends React.PureComponent {
   }
 
   render() {
-    const {css, className, style} = this.props;
+    const {css, className, style, innerRef} = this.props;
     return (
-      <Pre css={css} className={className} style={style}>
+      <Pre css={css} className={className} style={style} innerRef={innerRef}>
         <code dangerouslySetInnerHTML={this.createMarkup()} />
       </Pre>
     );

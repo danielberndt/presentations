@@ -21,7 +21,7 @@ class CaptureNextPrev extends React.Component {
   }
 }
 
-export default class SlideStepper extends React.Component {
+class RawSlideStepper extends React.Component {
   static contextTypes = {
     slide: PropTypes.object,
   };
@@ -30,8 +30,7 @@ export default class SlideStepper extends React.Component {
 
   handleNext = () => {
     const {index} = this.state;
-    const {children} = this.props;
-    const childCount = Array.isArray(children) ? children.length : 1;
+    const childCount = this.childCount || 1;
     if (index + 1 >= childCount) return false;
     this.setState({index: index + 1});
   };
@@ -42,12 +41,7 @@ export default class SlideStepper extends React.Component {
     this.setState({index: index - 1});
   };
 
-  renderChildren = interpolatedIdx => {
-    return React.Children.map(this.props.children, (c, i) => {
-      const progress = Math.max(0, Math.min(1, interpolatedIdx + 1 - i));
-      return React.cloneElement(c, {progress});
-    });
-  };
+  handleChildCount = count => (this.childCount = count);
 
   render() {
     const {isActiveSlide} = this.context.slide;
@@ -57,13 +51,27 @@ export default class SlideStepper extends React.Component {
         {({idx}) => (
           <React.Fragment>
             {isActiveSlide && <CaptureNextPrev next={this.handleNext} prev={this.handlePrev} />}
-            {this.renderChildren(idx)}
+            {this.props.children(idx, index, this.handleChildCount)}
           </React.Fragment>
         )}
       </Motion>
     );
   }
 }
+
+const SlideStepper = ({children}) => (
+  <RawSlideStepper>
+    {(idx, index, setChildCount) =>
+      React.Children.map(children, (c, i) => {
+        const progress = Math.max(0, Math.min(1, idx + 1 - i));
+        setChildCount(i + 1);
+        return React.cloneElement(c, {progress});
+      })
+    }
+  </RawSlideStepper>
+);
+
+export default SlideStepper;
 
 const StepComp = g.ul({
   ":not(:last-child)": {marginBottom: "1vh"},
@@ -91,3 +99,45 @@ export const RawStep = ({
   else transform = `translate3d(${(1 - progress) * 2}vw,0,0)`;
   return <Comp style={{opacity: progress, transform, ...style}} {...rest} />;
 };
+
+export class SlideCarousel extends React.Component {
+  refHandler = {};
+  refY = {};
+
+  handleNode = (n, index) => {
+    if (n) {
+      debugger;
+      this.refY[index] = n.offsetTop;
+    }
+  };
+
+  handleRef = index => {
+    return (this.refHandler[index] = this.refHandler[index] || (n => this.handleNode(n, index)));
+  };
+
+  render() {
+    const {children, ...rest} = this.props;
+    return (
+      <RawSlideStepper>
+        {(idx, index, setChildCount) => (
+          <Motion style={{y: spring(this.refY[index] || 0)}}>
+            {({y}) => (
+              <div {...rest}>
+                <div style={{transform: `translate3d(0, ${-y}px, 0)`, marginTop: "30vh"}}>
+                  {React.Children.map(children, (c, i) => {
+                    const progress = Math.max(0, Math.min(1, idx + 1 - i));
+                    setChildCount(i + 1);
+                    return React.cloneElement(c, {progress, handleRef: this.handleRef(i)});
+                  })}
+                </div>
+              </div>
+            )}
+          </Motion>
+        )}
+      </RawSlideStepper>
+    );
+  }
+}
+
+export const ScrollStep = ({progress, handleRef, children}) =>
+  children({opacity: progress}, handleRef);
