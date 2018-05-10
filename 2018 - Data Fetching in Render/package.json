@@ -20,6 +20,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "PUBLIC_URL='./' react-scripts build",
+    "build-and-move": "npm run build && mv build ../docs/2018-data-fetching-in-render",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   }
