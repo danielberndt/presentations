@@ -46,7 +46,7 @@ export default class Fullscreen extends Component {
   render() {
     return (
       <Container onClick={this.handleToggleFullScreen}>
-        <g.Svg viewBox="0 0 512 512" width="1vw" height="1vw" display="block">
+        <g.Svg viewBox="0 0 512 512" css={{width: "1vw", height: "1vw", display: "block"}}>
           <path
             d="M73.143,329.143H0V512h182.857v-73.143H73.143V329.143z M0,182.857h73.143V73.143h109.715V0H0V182.857z M438.857,438.857 H329.143V512H512V329.143h-73.143V438.857z M329.143,0v73.143h109.715v109.715H512V0H329.143z"
             fill="#002c44"
