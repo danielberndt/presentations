@@ -9,6 +9,7 @@ import createHistoryNavigator from "./lib/navigator";
 import SlideStepper, {Step, RawStep, ScrollStep, SlideCarousel} from "./comps/SlideStepper";
 import Arrow from "./Arrow";
 import Code, {codeStyle} from "./Code";
+import PointerController from "./comps/PointerController";
 
 const navigator = createHistoryNavigator();
 
@@ -287,6 +288,7 @@ class App extends React.Component {
         <Controller navigator={navigator}>
           {({index, prev, next}) => (
             <KeyboardController prev={prev} next={next}>
+              <PointerController prev={prev} next={next} />
               <Master
                 index={index}
                 defaultParams={{
@@ -338,10 +340,10 @@ class App extends React.Component {
                 <KSlide title="About this Talk" masterParams={{themeCol: cols[0]}}>
                   <SlideStepper>
                     <Step>
-                      Talking with Karl Horky – co-organiser at last React Open Source Event.
+                      Talking with Karl Horky – co-organiser at last React Open Source event:
                     </Step>
                     <Step css={{marginLeft: "5vw"}}>"So, have you been working with GraphQL?"</Step>
-                    <Step css={{marginLeft: "5vw"}}>"Not quite, but ..."</Step>
+                    <Step css={{marginLeft: "5vw"}}>"Not really, but ..."</Step>
                     <Step css={{marginLeft: "5vw"}}>
                       "You definitely should give a talk about this!"
                     </Step>
@@ -805,6 +807,16 @@ queueRequest("File", "user(id: 5).profileImage", "url");
                     <ScrollStep>
                       {(style, ref) => (
                         <WithTopArrow innerRef={ref} style={style}>
+                          <g.Div textAlign="center" margin="2vh 0 3vh">
+                            Call <InlineCode>forceUpdate</InlineCode> at root of app, to rerender
+                            the whole component tree
+                          </g.Div>
+                        </WithTopArrow>
+                      )}
+                    </ScrollStep>
+                    <ScrollStep>
+                      {(style, ref) => (
+                        <WithTopArrow innerRef={ref} style={style}>
                           <Code>{`
 render() {
   const user = getInstance("User", this.props.userId)
@@ -968,7 +980,7 @@ const DataProvider = ({children}) => {
                 <KSlide
                   title="Thanks!"
                   masterParams={{themeCol: cols[4]}}
-                  contentCss={{fontSize: "3vw"}}
+                  contentCss={{fontSize: "4vh"}}
                 >
                   Let's stay in touch!<br />
                   <a href="https://twitter.com/D40B">

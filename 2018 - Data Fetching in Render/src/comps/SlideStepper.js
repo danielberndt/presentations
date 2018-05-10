@@ -106,7 +106,6 @@ export class SlideCarousel extends React.Component {
 
   handleNode = (n, index) => {
     if (n) {
-      debugger;
       this.refY[index] = n.offsetTop;
     }
   };

@@ -14,6 +14,7 @@ export const codeStyle = {
 };
 
 const Pre = g.pre(codeStyle, {
+  overflowX: "auto",
   " .token.comment, .token.prolog, .token.doctype, .token.cdata": {
     color: "slategray",
   },
